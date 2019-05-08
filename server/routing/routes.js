@@ -9,6 +9,9 @@ const passport = require('passport');
 const registerValidation = require('../validation/register');
 const loginValidation = require('../validation/login');
 
+// Helper Date file for user
+const registerDate = require('../helpers/DateStamp');
+
 // Importing the Mongoose model to be able to modify database || CRUD
 const User = require('../models/User');
 
@@ -40,7 +43,7 @@ router.post('/register', (req, res) => {
           name: req.body.name,
           email: req.body.email,
           password: hash,
-          registeredAt: Date.now()
+          registeredAt: registerDate
         });
         // Now we save the user into the database. Send back a success message if everything goes okay. Return a error if not.
         newUser
