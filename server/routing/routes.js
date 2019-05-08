@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 12; // Salt rounds for hashing the password
 const jwt = require('jsonwebtoken');
 const keys = require('../config/keys');
+const passport = require('passport');
 // Validation for the Login and Register Routes
 const registerValidation = require('../validation/register');
 const loginValidation = require('../validation/login');
@@ -106,5 +107,13 @@ router.post('/login', (req, res) => {
     }
   });
 });
+
+router.get(
+  '/current',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    res.json({ name: req.user.name, id: req.user.id });
+  }
+);
 
 module.exports = router;
