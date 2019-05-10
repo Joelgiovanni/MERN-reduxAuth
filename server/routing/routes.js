@@ -46,15 +46,12 @@ router.post('/register', (req, res) => {
           registeredAt: registerDate
         });
         // Now we save the user into the database. Send back a success message if everything goes okay. Return a error if not.
-        newUser
-          .save()
-          .then(() => {
-            res.json({
-              success: true,
-              message: `Welcome ${req.body.name}`
-            });
-          })
-          .catch(err => console.log(err));
+        newUser.save().then(() => {
+          res.json({
+            success: true,
+            message: `Welcome ${req.body.name}`
+          });
+        });
       });
     }
   });
@@ -71,43 +68,40 @@ router.post('/login', (req, res) => {
   if (!isValid) {
     return res.status(400).json(errors); // The errors return will be the ones we made in our helper file. This is our custom error handling.
   }
+
   const { email, password } = req.body;
+
   // Find the user by email
   User.findOne({ email }).then(user => {
     if (!user) {
-      res.status(400).json({
-        success: false,
-        message: `The email ${email} does not seem to be registered with us. Please try again`
-      });
-    } else {
-      bcrypt.compare(password, user.password).then(isMatch => {
-        if (isMatch) {
-          // The user has successfully been found and the password is correct.
-          // set a Payload that will return any user info that we want to save in the JSONwebToken
-          const payload = {
-            id: user.id,
-            email: user.email
-          };
-
-          // Sign the token and ship it
-          jwt.sign(
-            payload, // Data to send
-            keys.secretOrKey, // required for security purposes,
-            { expiresIn: 3600 }, // 1 hour expiration. 3600 seconds === 1 hour
-            (err, token) => {
-              res.json({
-                success: true,
-                token: 'Bearer ' + token // ** note the space after 'Bearer ' to make it easier to extract the token
-              });
-            }
-          );
-        } else {
-          res
-            .status(400)
-            .json({ success: false, message: 'Credentials are invalid' });
-        }
-      });
+      res.status(400).json(errors);
     }
+
+    bcrypt.compare(password, user.password).then(isMatch => {
+      if (isMatch) {
+        // The user has successfully been found and the password is correct.
+        // set a Payload that will return any user info that we want to save in the JSONwebToken
+        const payload = {
+          id: user.id,
+          email: user.email
+        };
+
+        // Sign the token and ship it
+        jwt.sign(
+          payload, // Data to send
+          keys.secretOrKey, // required for security purposes,
+          { expiresIn: 3600 }, // 1 hour expiration. 3600 seconds === 1 hour
+          (err, token) => {
+            res.json({
+              success: true,
+              token: 'Bearer ' + token // ** note the space after 'Bearer ' to make it easier to extract the token
+            });
+          }
+        );
+      } else {
+        res.status(400).json({ password: 'Credentials are invalid' });
+      }
+    });
   });
 });
 
