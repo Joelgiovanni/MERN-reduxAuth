@@ -21,7 +21,12 @@ export default class login extends Component {
 
     axios
       .post('http://localhost:5000/api/login', user)
-      .then(res => console.log(res.data))
+      .then(res => {
+        // Save the Token to local storage
+        const { token } = res.data;
+        localStorage.setItem('jwtToken', token);
+        console.log('jwtToken');
+      })
       // This will grab the errors from the request and set them in the state so they can be rendered
       .catch(err => this.setState({ errors: err.response.data }));
   };
