@@ -14,13 +14,13 @@ class Dashboard extends Component {
     if (!this.props.auth.isAuthenticated) {
       this.props.history.push('/');
     }
-    console.log(this.props.state.user.name);
   }
 
   render() {
+    const { name } = this.props.auth.user;
     return (
       <div className='container'>
-        <h1>Welcome user!</h1>
+        <h1>Welcome {name}!</h1>
       </div>
     );
   }
