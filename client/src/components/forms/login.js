@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import classnames from 'classnames';
 import axios from 'axios';
+import setAuthToken from '../../helpers/setAuthToken';
 
-export default class login extends Component {
+class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -24,8 +26,11 @@ export default class login extends Component {
       .then(res => {
         // Save the Token to local storage
         const { token } = res.data;
-        localStorage.setItem('jwtToken', token);
-        console.log('jwtToken');
+        // Set the extracted token to local storage
+        localStorage.setItem('jwtToken', JSON.stringify(token));
+        // Our helper function will set the Authorization header with the token
+        setAuthToken(token);
+        this.props.history.push('/protected');
       })
       // This will grab the errors from the request and set them in the state so they can be rendered
       .catch(err => this.setState({ errors: err.response.data }));
@@ -82,3 +87,5 @@ export default class login extends Component {
     );
   }
 }
+
+export default withRouter(Login);
