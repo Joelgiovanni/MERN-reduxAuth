@@ -83,7 +83,8 @@ router.post('/login', (req, res) => {
         // set a Payload that will return any user info that we want to save in the JSONwebToken
         const payload = {
           id: user.id,
-          email: user.email
+          email: user.email,
+          name: user.name
         };
 
         // Sign the token and ship it

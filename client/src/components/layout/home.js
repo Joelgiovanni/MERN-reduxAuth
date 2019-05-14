@@ -1,7 +1,15 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 class Home extends Component {
+  // Redirect to dashboard if a user is logged in. Will not allow access to this component if already logged in
+  componentDidMount() {
+    if (this.props.auth.isAuthenticated) {
+      this.props.history.push('/dashboard');
+    }
+  }
   render() {
     return (
       <div className='landing'>
@@ -26,4 +34,17 @@ class Home extends Component {
   }
 }
 
-export default Home;
+// Setting up Redux in this component
+Home.propTypes = {
+  auth: PropTypes.object.isRequired
+};
+
+const mapStateToProps = state => ({
+  auth: state.auth,
+  errors: state.errors
+});
+
+export default connect(
+  mapStateToProps,
+  {}
+)(withRouter(Home));

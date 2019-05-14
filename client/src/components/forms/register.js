@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
+import { withRouter } from 'react-router-dom';
 import classnames from 'classnames';
-import axios from 'axios';
+import { connect } from 'react-redux';
+import { registerUser } from '../../actions/authActions';
+import PropTypes from 'prop-types';
 
 class Register extends Component {
   constructor(props) {
@@ -14,21 +17,32 @@ class Register extends Component {
     };
   }
 
+  // Redirect to dashboard if a user is logged in. Will not allow access to this component if already logged in
+  componentDidMount() {
+    if (this.props.auth.isAuthenticated) {
+      this.props.history.push('/');
+    }
+  }
+
+  // Will check for errors in the props that will be recieved. Will set the errors to the errors object in state and render them on the UI
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.errors) {
+      this.setState({ errors: nextProps.errors });
+    }
+  }
+
   onSubmit = e => {
     e.preventDefault();
 
-    const newUser = {
+    const userData = {
       name: this.state.name,
       email: this.state.email,
       password: this.state.password,
       password2: this.state.password2
     };
 
-    axios
-      .post('http://localhost:5000/api/register', newUser)
-      .then(res => console.log(res.data))
-      // This will grab the errors from the request and set them in the state so they can be rendered
-      .catch(err => this.setState({ errors: err.response.data }));
+    // Axios call in reducer
+    this.props.registerUser(userData, this.props.history);
   };
 
   onChange = e => {
@@ -120,4 +134,19 @@ class Register extends Component {
   }
 }
 
-export default Register;
+// Setting up Redux
+Register.propTypes = {
+  registerUser: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired
+};
+
+const mapStateToProps = state => ({
+  auth: state.auth,
+  errors: state.errors
+});
+// WithRouter will pass updated match, location, and history props to the wrapped component whenever it renders.
+
+export default connect(
+  mapStateToProps,
+  { registerUser }
+)(withRouter(Register));

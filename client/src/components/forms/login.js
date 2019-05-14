@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router-dom';
+import { loginUser } from '../../actions/authActions';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import axios from 'axios';
-import setAuthToken from '../../helpers/setAuthToken';
 
 class Login extends Component {
   constructor(props) {
@@ -14,26 +15,32 @@ class Login extends Component {
     };
   }
 
+  // Redirect to dashboard if a user is logged in. Will not allow access to this component if already logged in
+  componentDidMount() {
+    if (this.props.auth.isAuthenticated) {
+      this.props.history.push('/');
+    }
+  }
+
+  // Instructions on what the component should do when new props are brought in, what to do with them & how to handle them
+  componentWillReceiveProps(nextProps) {
+    // Rdirect to dashboard if logged in is a succcess
+    if (nextProps.auth.isAuthenticated) {
+      this.props.history.push('/dashboard');
+    }
+    if (this.props.errors) {
+      this.setState({ errors: nextProps.errors });
+    }
+  }
+
   onSubmit = e => {
     e.preventDefault();
-    const user = {
+
+    const userData = {
       email: this.state.email,
       password: this.state.password
     };
-
-    axios
-      .post('http://localhost:5000/api/login', user)
-      .then(res => {
-        // Save the Token to local storage
-        const { token } = res.data;
-        // Set the extracted token to local storage
-        localStorage.setItem('jwtToken', JSON.stringify(token));
-        // Our helper function will set the Authorization header with the token
-        setAuthToken(token);
-        this.props.history.push('/protected');
-      })
-      // This will grab the errors from the request and set them in the state so they can be rendered
-      .catch(err => this.setState({ errors: err.response.data }));
+    this.props.loginUser(userData, this.props.history);
   };
 
   onChange = e => {
@@ -88,4 +95,18 @@ class Login extends Component {
   }
 }
 
-export default withRouter(Login);
+Login.propTypes = {
+  loginUser: PropTypes.func.isRequired,
+  auth: PropTypes.object.isRequired,
+  errors: PropTypes.object.isRequired
+};
+
+const mapStateToProps = state => ({
+  auth: state.auth,
+  errors: state.errors
+});
+
+export default connect(
+  mapStateToProps,
+  { loginUser }
+)(withRouter(Login));
